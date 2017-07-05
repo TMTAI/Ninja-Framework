@@ -1,0 +1,543 @@
+<#import "../layout/defaultLayout.ftl.html" as layout>
+    <@layout.myLayout "Homepage">
+    <div style="height: 100%; width: 100%;padding-top: 40px;" layout-fill ng-app="App" id="index"
+         ng-controller="HomePageCtrl">
+        <md-progress-linear style="position: fixed;" ng-if="getting" md-mode="indeterminate"></md-progress-linear>
+        <div layout-fill layout="row" layout-align="start start">
+                <md-content style="background-color: white;height: 100%" flex="20">
+                    <div ng-init="dashboards" layout="column"
+                         layout-align="start stretch">
+
+                        <md-button ng-if="currentDashboard.owner == name && !configPage"
+                                   class="md-primary md-raised"
+                                   ng-click="showAddWidgetDialog($event)">
+                            Add new gadget
+                        </md-button>
+                        <md-list layout-fill>
+                            <md-list-item layout="row"
+                                          class="md-2-line" ng-repeat="item in dashboardNameList"
+                                          ng-class="{'selected-gadget': selectedDashboardId==item.id}"
+                                          ng-click="dashboardListItemClicked(item)">
+                                <div layout="row">
+                                    <md-icon ng-if="item.privacy.status == 'public'"
+                                             style="color: #8c8c8c;" class="material-icons">public
+                                    </md-icon>
+                                    <md-icon ng-if="item.privacy.status == 'other'"
+                                             style="color: #8c8c8c;" class="material-icons">people_outline
+                                    </md-icon>
+                                    <md-icon ng-if="item.privacy.status == 'private'"
+                                             style="color: #8c8c8c;" class="material-icons">lock_outline
+                                    </md-icon>
+                                </div>
+
+                                <div style="margin-left: 10px; margin-right: 10px" flex
+                                     class="md-list-item-text">
+                                    <h3 style="color: #205081">{{item.name}}</h3>
+                                    <p>{{item.owner}}</p>
+                                </div>
+
+                                <md-button ng-if="item.owner == name"
+                                           ng-click="dashboardOptionClicked(item,$event)"
+                                           class="md-icon-button">
+                                    <md-icon style="color: grey;"
+                                             class="material-icons">settings
+                                    </md-icon>
+                                    <md-tooltip
+                                            md-direction="bottom"> Option
+                                    </md-tooltip>
+                                </md-button>
+                            </md-list-item>
+                        </md-list>
+                    </div>
+                </md-content>
+
+            <div id="gadgetContainer" layout="column" layout-align="start center">
+
+                <div layout-fill layout="column" layout-align="center center" ng-if="dashboardGadgetInfo.Gadget==0">
+                    No gadget found
+                </div>
+                <div layout-fill layout-align="center center" layout="row" ng-if="hasInfo">Loading
+                    {{dashboardGadgetInfo.Gadget}} gadget
+                    <div ng-if="dashboardGadgetInfo.Gadget>1">s</div>
+                </div>
+
+                <div id="{{item.id}}" ng-init="hide=flase" ng-repeat="item in sonarStList"
+                     style="width: 100%">
+                    <md-card class="gadget" md-whiteframe="8">
+                        <div class="gadgetHeader" layout="row" layout-align="start center">
+                            <h4>AMS SONAR Statistics {{item.release}}</h4>
+                            <div ng-if="item.lastUpateTime > 1">(update {{item.lastUpateTime}} mins ago)</div>
+                            <div ng-if="item.lastUpateTime == 1">(update {{item.lastUpateTime}} min ago)</div>
+                            <div ng-if="item.lastUpateTime == 0">(just update)</div>
+
+                            <div flex></div>
+                            <md-button class="md-icon-button" ng-if="currentDashboard.owner == name"
+                                       style="color: yellow;"
+                                       ng-click="editSonarGagdget(item,$event)">
+                                <md-icon class="material-icons">edit</md-icon>
+
+                                <md-tooltip md-direction="bottom">
+                                    Edit
+                                </md-tooltip>
+                            </md-button>
+                            <md-button class="md-icon-button" ng-if="currentDashboard.owner == name"
+                                       style="color: orange; margin-right: 10px"
+                                       ng-click="deleteGagdget(item)">
+                                <md-icon class="material-icons">delete</md-icon>
+
+                                <md-tooltip md-direction="bottom">
+                                    Delete
+                                </md-tooltip>
+                            </md-button>
+                            <md-button class="md-icon-button" ng-click="clearCacheGagdget(item)">
+                                <md-icon class="material-icons">refresh</md-icon>
+
+                                <md-tooltip md-direction="bottom">
+                                    Update
+                                </md-tooltip>
+                            </md-button>
+                            <md-button class="md-icon-button" ng-click="hide=!hide">
+                                <md-icon aria-label="" ng-if="hide" class="material-icons">expand_more</md-icon>
+                                <md-tooltip ng-if="hide" md-direction="bottom">
+                                    Toggle View
+                                </md-tooltip>
+
+                                <md-icon ng-if="!hide" class="material-icons">expand_less</md-icon>
+                                <md-tooltip ng-if="!hide" md-direction="bottom">
+                                    Toggle View
+                                </md-tooltip>
+                            </md-button>
+                        </div>
+                        <table ng-if="!hide" class="responstable" style="width: 100%" ng-mouseover="gadgetHover(item)">
+                            <tr>
+                                <th>Index</th>
+                                <th>Component</th>
+                                <th ng-repeat="metric in item.metricList">{{metric.name}}</th>
+                            </tr>
+                            <tbody class="responstable" ng-repeat="x in item.RsIAArray">
+                            <tr>
+                                <td style="text-align: left"
+                                    colspan="{{item.metricList.length+2}}"><b>{{x.name}}</b> <span
+                                        ng-if="x.Components.length == 0"><b> | No Component</b></span></td>
+                            </tr>
+                            <tr ng-repeat="y in x.Components | orderBy: 'componentName'">
+                                <td>{{$index + 1}}</td>
+                                <td style="text-align: left;">
+                                    <a ng-href="http://bamboo.in.alcatel-lucent.com:8085/overview/?id={{y.componentKey}}"
+                                       target="_blank">
+                                        {{ y.componentKey }}
+                                    </a>
+                                </td>
+                                <td ng-repeat="metric in item.metricList">
+                                    <a ng-href="http://bamboo.in.alcatel-lucent.com:8085/component_measures/metric/coverage/list?id={{y.componentKey}}"
+                                       target="_blank" ng-if="metric.key=='coverage'"
+                                       ng-style="y.metricVal[metric.key] < {{limit}} && {'color':'red'}">
+                                        {{y.metricVal[metric.key]}}
+                                        <span ng-if="check(y.metricVal[metric.key])">%</span>
+                                    </a>
+                                    <span ng-style="y.metricVal[metric.key] > 0 && {'color':'red'}"
+                                          ng-if="metric.key!=='new_coverage' && metric.key!=='coverage' && metric.key!=='test_execution_time'">
+                                    	{{y.metricVal[metric.key] }}
+                                    </span>
+                                    <span ng-if="metric.key=='test_execution_time'">
+                                    	{{y.metricVal[metric.key]}} <span
+                                            ng-if="check(y.metricVal[metric.key])"> s</span>
+                                    </span>
+
+                                    <a ng-href="http://bamboo.in.alcatel-lucent.com:8085/component_measures/metric/new_coverage/list?id={{y.componentKey}}"
+                                       target="_blank" ng-style="y.metricVal[metric.key] < {{limit}} && {'color':'red'}"
+                                       ng-if="metric.key=='new_coverage'">
+                                        {{y.metricVal[metric.key]}} <span
+                                            ng-if="check(y.metricVal[metric.key])">%</span>
+                                    </a>
+                                </td>
+                                <!-- <td ng-if="y.metricVal.coverage"
+                                    ng-style="y.metricVal.coverage < {{limit}} && {'color':'red'}">
+                                    <a ng-href="http://bamboo.in.alcatel-lucent.com:8085/component_measures/metric/coverage/list?id={{y.componentKey}}"
+                                       target="_blank">
+                                        {{y.metricVal.coverage}}
+                                        <span ng-if="check(y.metricVal.coverage)">%</span>
+                                    </a>
+                                </td>
+                                <td ng-if="y.metricVal.critical_violations"
+                                    ng-style="y.metricVal.critical_violations > 0 && {'color':'red'}">{{
+                                    y.metricVal.critical_violations }}
+                                </td>
+
+                                <td ng-if="y.metricVal.test_errors"
+                                    ng-style="y.metricVal.test_errors > 0 && {'color':'red'}">{{
+                                    y.metricVal.test_errors}}
+                                </td>
+                                <td ng-if="y.metricVal.test_failures"
+                                    ng-style="y.metricVal.test_failures > 0 && {'color':'red'}">{{
+                                    y.metricVal.test_failures}}
+                                </td>
+                                <td ng-if="y.metricVal.test_execution_time">{{
+                                    y.metricVal.test_execution_time}} <span
+                                            ng-if="check(y.metricVal.test_execution_time)"> s</span>
+                                </td>
+
+                                <td ng-if="y.metricVal.new_coverage"
+                                    ng-style="y.metricVal.new_coverage < {{limit}} && {'color':'red'}">
+                                    <a ng-href="http://bamboo.in.alcatel-lucent.com:8085/component_measures/metric/new_coverage/list?id={{y.componentKey}}"
+                                       target="_blank">
+                                        {{y.metricVal.new_coverage}} <span
+                                            ng-if="check(y.metricVal.new_coverage)">%</span>
+                                    </a>
+                                </td> -->
+                            </tr>
+                            </tbody>
+                        </table>
+                    </md-card>
+                </div>
+
+
+                <div id="{{re.id}}" ng-init="hide=flase" ng-repeat="re in reviewList" style="width: 100%">
+                    <md-card class="gadget" md-whiteframe="8">
+                        <div class="gadgetHeader" layout="row" layout-align="start center">
+                            <h4>AMS Overdue Reviews Report {{re.project}}</h4>
+                            <div ng-if="re.lastUpateTime > 1">(update {{re.lastUpateTime}} mins ago)</div>
+                            <div ng-if="re.lastUpateTime == 1">(update {{re.lastUpateTime}} min ago)</div>
+                            <div ng-if="re.lastUpateTime == 0">(just update)</div>
+                            <div flex></div>
+                            <md-button class="md-icon-button" ng-if="currentDashboard.owner == name"
+                                       style="color: orange; margin-right: 10px"
+                                       ng-click="deleteGagdget(re)">
+                                <md-icon class="material-icons">delete</md-icon>
+                                <md-tooltip md-direction="bottom">
+                                    Delete
+                                </md-tooltip>
+                            </md-button>
+                            <md-button class="md-icon-button" ng-if="currentDashboard.owner == name"
+                                       style="color: yellow;"
+                                       ng-click="editReviewGagdget(re,$event)">
+                                <md-icon class="material-icons">edit</md-icon>
+
+                                <md-tooltip md-direction="bottom">
+                                    Edit
+                                </md-tooltip>
+                            </md-button>
+                            <md-button class="md-icon-button"
+                                       ng-click="clearCacheGagdget(re)">
+                                <md-icon class="material-icons">refresh</md-icon>
+
+                                <md-tooltip md-direction="bottom">
+                                    Update
+                                </md-tooltip>
+                            </md-button>
+                            <md-button aria-label="Toggle View" class="md-icon-button" ng-click="hide=!hide">
+                                <md-icon ng-if="hide" class="material-icons">expand_more</md-icon>
+                                <md-tooltip ng-if="hide" md-direction="bottom">
+                                    Toggle View
+                                </md-tooltip>
+
+                                <md-icon ng-if="!hide" class="material-icons">expand_less</md-icon>
+                                <md-tooltip ng-if="!hide" md-direction="bottom">
+                                    Toggle View
+                                </md-tooltip>
+                            </md-button>
+                        </div>
+                        <table ng-if="!hide" class="responstable" style="width: 100%" ng-mouseover="gadgetHover(re)">
+                            <tr>
+                                <th>Index</th>
+                                <th>IA</th>
+                                <th>X < 5</th>
+                                <th>5 < X < 10</th>
+                                <th>X > 10</th>
+                            </tr>
+                            <tr ng-repeat="y in re.ReviewDataArray">
+                                <td>{{$index + 1}}</td>
+                                <td style="text-align: left;">{{ y.creator }}</td>
+                                <td>{{ y.col1 }}</td>
+                                <td>{{ y.col2 }}</td>
+                                <td>{{ y.col3 }}</td>
+                            </tr>
+                        </table>
+                    </md-card>
+                </div>
+
+                <div id="greenhopperGadgetContainer" layout-align="start center" style="width: 100%">
+
+                    <div id="{{item.id}}" data-ng-repeat="item in greenHopperGadgets"
+                         class="col-md-12" style="min-height: 20px;">
+                        <hr>
+                        <md-card class="gadget" md-whiteframe="8"> <!-- Epic gadget html -->
+
+                            <div data-ng-init="init(item)"
+                                 data-ng-if="item.type === 'EPIC_US_TEST_EXECUTION'"
+                                 data-ng-controller="EpicController" data-ng-mouseover="hoverOn()">
+                                <div class="gadgetHeader" layout="row" layout-align="start center">
+                                    <h4>Epic Test Execution Gadget | {{item.projectName}} {{item.products[0]}}
+                                        {{item.release}} {{titleAdditionalInfo}} {{updateInfo}}</h4>
+                                    <div flex></div>
+                                    <div data-ng-if="currentDashboard.owner == name || isAdmin">
+
+                                        <md-button class="md-icon-button" ng-if="currentDashboard.owner == name"
+                                                   ng-click="editGreenhopperGadget(item, $event)">
+                                            <md-icon class="material-icons">edit</md-icon>
+
+                                            <md-tooltip md-direction="bottom">
+                                                Edit
+                                            </md-tooltip>
+                                        </md-button>
+
+                                        <md-button class="md-icon-button" ng-if="currentDashboard.owner == name"
+                                                   ng-click="deleteGreenhopperGadget(item)">
+                                            <md-icon class="material-icons">delete</md-icon>
+                                            <md-tooltip md-direction="bottom">
+                                                Delete
+                                            </md-tooltip>
+                                        </md-button>
+                                    </div>
+                                    <md-button class="md-icon-button"
+                                               ng-click="clearCacheGreenhopperGagdget(item)">
+                                        <md-icon
+                                                class="material-icons">refresh
+                                        </md-icon>
+                                        <md-tooltip
+                                                md-direction="bottom"> Update Cache
+                                        </md-tooltip>
+                                    </md-button>
+                                    <md-button class="md-icon-button" ng-click="toggleView()">
+                                        <md-icon class="material-icons">keyboard_capslock</md-icon>
+                                        <md-tooltip md-direction="bottom">
+                                            Toggle View
+                                        </md-tooltip>
+                                    </md-button>
+
+                                </div>
+                                <div data-ng-show="showView" id="epic-table-container"
+                                     class="col-md-12" align="center" style="display: none">
+                                    <table id="epic-table" class="display">
+                                        <thead>
+                                        <tr>
+                                            <th>Epic Link</th>
+                                            <th>SUMMARY</th>
+                                            <th>PRIORITY</th>
+                                            <th>UNEXECUTED</th>
+                                            <th>FAILED</th>
+                                            <th>WIP</th>
+                                            <th>BLOCKED</th>
+                                            <th>PASSED</th>
+                                            <th>PLANNED</th>
+                                            <th>ACTUAL</th>
+                                        </tr>
+                                        </thead>
+                                        <tfoot>
+                                        <tr>
+                                            <th>Epic Link</th>
+                                            <th>SUMMARY</th>
+                                            <th>PRIORITY</th>
+                                            <th>UNEXECUTED</th>
+                                            <th>FAILED</th>
+                                            <th>WIP</th>
+                                            <th>BLOCKED</th>
+                                            <th>PASSED</th>
+                                            <th>PLANNED</th>
+                                            <th>ACTUAL</th>
+                                        </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                <div id="epic-table-loader" class="col-md-12"
+                                     style="display: none" align="center">
+                                    <div class="loader"></div>
+                                    <h2>Data is loading...</h2>
+                                </div>
+                            </div>
+
+                            <!-- User story gadget html -->
+                            <div data-ng-init="init(item)"
+                                 data-ng-if="item.type === 'STORY_TEST_EXECUTION'"
+                                 data-ng-controller="StoryController" data-ng-mouseover="hoverOn()">
+                                <div class="gadgetHeader" layout="row" layout-align="start center">
+                                    <h4>User Story Test Execution Gadget | {{item.projectName}} {{item.products[0]}}
+                                        {{item.release}} {{titleAdditionalInfo}} {{updateInfo}}</h4>
+                                    <div flex></div>
+
+                                    <div data-ng-if="currentDashboard.owner == name || isAdmin">
+
+                                        <md-button class="md-icon-button" ng-if="currentDashboard.owner == name"
+                                                   ng-click="editGreenhopperGadget(item, $event)">
+                                            <md-icon class="material-icons">edit</md-icon>
+
+                                            <md-tooltip md-direction="bottom">
+                                                Edit
+                                            </md-tooltip>
+                                        </md-button>
+
+                                        <md-button class="md-icon-button" ng-if="currentDashboard.owner == name"
+                                                   style="color: orange; margin-right: 10px"
+                                                   ng-click="deleteGreenhopperGadget(item)">
+                                            <md-icon class="material-icons">delete</md-icon>
+
+                                            <md-tooltip md-direction="bottom">
+                                                Delete
+                                            </md-tooltip>
+                                        </md-button>
+
+                                    </div>
+                                    <md-button class="md-icon-button"
+                                               ng-click="clearCacheGreenhopperGagdget(item)">
+                                        <md-icon
+                                                class="material-icons">refresh
+                                        </md-icon>
+                                        <md-tooltip
+                                                md-direction="bottom"> Update Cache
+                                        </md-tooltip>
+                                    </md-button>
+                                    <md-button class="md-icon-button" ng-click="toggleView()">
+                                        <md-icon class="material-icons">keyboard_capslock</md-icon>
+                                        <md-tooltip md-direction="bottom">
+                                            Toggle View
+                                        </md-tooltip>
+                                    </md-button>
+                                </div>
+                                <div data-ng-show="showView" id="us-table-container"
+                                     class="col-md-12" align="center" style="display: none"></div>
+                                <div id="us-table-loader" class="col-md-12" style="display: none"
+                                     align="center">
+                                    <div class="loader"></div>
+                                    <h2>Data is loading...</h2>
+                                </div>
+                            </div>
+
+                            <!-- Cycle gadget html -->
+                            <div data-ng-init="init(item)"
+                                 data-ng-if="item.type === 'TEST_CYCLE_TEST_EXECUTION'"
+                                 data-ng-controller="CycleController" data-ng-mouseover="hoverOn()">
+                                <div class="gadgetHeader" layout="row" layout-align="start center">
+                                    <h4>Cycle Test Execution Gadget | {{item.projectName}} {{item.products[0]}}
+                                        {{item.release}} {{titleAdditionalInfo}} {{updateInfo}}</h4>
+                                    <div flex></div>
+
+                                    <div data-ng-if="currentDashboard.owner == name || isAdmin">
+
+                                        <md-button class="md-icon-button" ng-if="currentDashboard.owner == name"
+                                                   ng-click="editGreenhopperGadget(item, $event)">
+                                            <md-icon class="material-icons">edit</md-icon>
+
+                                            <md-tooltip md-direction="bottom">
+                                                Edit
+                                            </md-tooltip>
+                                        </md-button>
+
+                                        <md-button class="md-icon-button" ng-if="currentDashboard.owner == name"
+                                                   style="color: orange; margin-right: 10px"
+                                                   ng-click="deleteGreenhopperGadget(item)">
+                                            <md-icon class="material-icons">delete</md-icon>
+
+                                            <md-tooltip md-direction="bottom">
+                                                Delete
+                                            </md-tooltip>
+                                        </md-button>
+                                    </div>
+                                    <md-button class="md-icon-button"
+                                               ng-click="clearCacheGreenhopperGagdget(item)">
+                                        <md-icon
+                                                class="material-icons">refresh
+                                        </md-icon>
+                                        <md-tooltip
+                                                md-direction="bottom"> Update Cache
+                                        </md-tooltip>
+                                    </md-button>
+                                    <md-button class="md-icon-button" ng-click="toggleView()">
+                                        <md-icon class="material-icons">keyboard_capslock</md-icon>
+                                        <md-tooltip md-direction="bottom">
+                                            Toggle View
+                                        </md-tooltip>
+                                    </md-button>
+                                </div>
+                                <div data-ng-show="showView" id="cycle-table-container"
+                                     align="center" class="col-md-12" style="display: none">
+                                    <table id="cycle-table" class="display">
+                                        <thead>
+                                        <tr>
+                                            <th>Cycle</th>
+                                            <th>UNEXECUTED</th>
+                                            <th>FAILED</th>
+                                            <th>WIP</th>
+                                            <th>BLOCKED</th>
+                                            <th>PASSED</th>
+                                        </tr>
+                                        </thead>
+                                        <tfoot>
+                                        <tr>
+                                            <th>Cycle</th>
+                                            <th>UNEXECUTED</th>
+                                            <th>FAILED</th>
+                                            <th>WIP</th>
+                                            <th>BLOCKED</th>
+                                            <th>PASSED</th>
+                                        </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                <div id="cycle-table-loader" class="col-md-12"
+                                     style="display: none" align="center">
+                                    <div class="loader"></div>
+                                    <h2>Data is loading...</h2>
+                                </div>
+                            </div>
+
+                            <!-- Assignee story gadget html -->
+                            <div data-ng-init="init(item)"
+                                 data-ng-if="item.type === 'ASSIGNEE_TEST_EXECUTION'"
+                                 data-ng-controller="AssigneeController" data-ng-mouseover="hoverOn()">
+                                <div class="gadgetHeader" layout="row" layout-align="start center">
+                                    <h4>Assignee Test Execution Gadget | {{item.projectName}} {{item.products[0]}}
+                                        {{item.release}} {{titleAdditionalInfo}} {{updateInfo}}</h4>
+                                    <div flex></div>
+
+                                    <div data-ng-if="currentDashboard.owner == name || isAdmin">
+
+                                        <md-button class="md-icon-button" ng-if="currentDashboard.owner == name"
+                                                   ng-click="editGreenhopperGadget(item, $event)">
+                                            <md-icon class="material-icons">edit</md-icon>
+
+                                            <md-tooltip md-direction="bottom">
+                                                Edit
+                                            </md-tooltip>
+                                        </md-button>
+
+                                        <md-button class="md-icon-button" ng-if="currentDashboard.owner == name"
+                                                   style="color: orange; margin-right: 10px"
+                                                   ng-click="deleteGreenhopperGadget(item)">
+                                            <md-icon class="material-icons">delete</md-icon>
+
+                                            <md-tooltip md-direction="bottom">
+                                                Delete
+                                            </md-tooltip>
+                                        </md-button>
+                                    </div>
+                                    <md-button class="md-icon-button"
+                                               ng-click="clearCacheGreenhopperGagdget(item)">
+                                        <md-icon
+                                                class="material-icons">refresh
+                                        </md-icon>
+                                        <md-tooltip
+                                                md-direction="bottom"> Update Cache
+                                        </md-tooltip>
+                                    </md-button>
+                                    <md-button class="md-icon-button" ng-click="toggleView()">
+                                        <md-icon class="material-icons">keyboard_capslock</md-icon>
+                                        <md-tooltip md-direction="bottom">
+                                            Toggle View
+                                        </md-tooltip>
+                                    </md-button>
+                                </div>
+                                <div data-ng-show="showView" id="assignee-table-container"
+                                     class="col-md-12" align="center" style="display: none"></div>
+                                <div id="assignee-table-loader" class="col-md-12"
+                                     style="display: none" align="center">
+                                    <div class="loader"></div>
+                                    <h2>Data is loading...</h2>
+                                </div>
+                            </div>
+                        </md-card>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</@layout.myLayout>

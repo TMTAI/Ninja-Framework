@@ -1,0 +1,622 @@
+<#import "../layout/defaultLayout.ftl.html" as layout>
+    <@layout.myLayout "Epg Dashboard">
+    <div style="height: 100%; width: 100%;padding-top: 40px;" ng-controller="EpgDashboardCtrl" layout-padding
+         ng-app="App" data-ng-init="getListRelease()" layout="column">
+        <div style="position: fixed; z-index: 99; top: 90%; left: 90%;">
+            <md-button class="md-fab md-mini" aria-label="Eat cake" ng-click="gotoAnchor('top', true, false)">
+                <md-tooltip md-direction="left">
+                    Go to Table of content
+                </md-tooltip>
+                <md-icon>vertical_align_top</md-icon>
+            </md-button>
+        </div>
+        <md-content>
+            <div class="gadgetHeader" layout="row" layout-align="start center">
+                <h4>Epg Dashboard | {{updateInfo}}</h4>
+                <div flex></div>
+                <md-button class="md-icon-button" ng-click="clearCacheEpgDashboard()">
+                    <md-icon class="material-icons">refresh</md-icon>
+                    <md-tooltip md-direction="bottom"> Update Cache</md-tooltip>
+                </md-button>
+                <md-button class="md-icon-button" ng-click="toggleView()">
+                    <md-icon class="material-icons">keyboard_capslock</md-icon>
+                    <md-tooltip md-direction="bottom"> Toggle View</md-tooltip>
+                </md-button>
+            </div>
+
+            <div data-ng-show="showView">
+                <!--Create tab list for each release-->
+                <md-tabs md-dynamic-height md-border-bottom md-no-select-click="showProgressCircular">
+                    <md-tab label="{{tab.name}}" ng-repeat="tab in tabList" md-on-select="onTabSelected(tab.name,false)"
+                            ng-if="tab.display">
+                        <div layout-fill layout-padding>
+                            <md-content>
+                                <div layout="column" layout-padding layout-fill layout-align="space-between center">
+                                    <div ng-if="showProgressCircular" layout="column" layout-align="space-around center"
+                                         style="height: 170px;">
+                                        <div class="message">
+                                            <span ng-bind="message"></span>
+                                        </div>
+                                        <md-progress-circular md-diameter="100"></md-progress-circular>
+                                    </div>
+                                    <div ng-if="!showProgressCircular" layout-padding>
+                                        <div ng-if="updatingData">Data is being updating!</div>
+                                        <!-- Table of content-->
+                                        <div ng-if="!updatingData">
+                                            <div flex id="top" style="width: 100%">
+                                                <md-card layout-fill layout-padding md-whiteframe="5">
+                                                    <md-card-title>
+                                                        <md-card-title-text>
+                                                            <span class="md-display-1">Table of content</span> <br/>
+                                                        </md-card-title-text>
+                                                    </md-card-title>
+                                                    <md-card-content>
+                                                        <table border="1" style="width:50%;">
+                                                            <tbody>
+                                                            <tr ng-repeat="(product,component) in data.listProduct">
+                                                                <td><span ng-bind="product"></span></td>
+                                                                <td><a href=""
+                                                                       ng-click="gotoAnchor(product,true,true)">Epic</a>
+                                                                </td>
+                                                                <td><a href=""
+                                                                       ng-click="gotoAnchor(product,false,true)">Summary</a>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </md-card-content>
+                                                </md-card>
+                                            </div>
+                                            <!-- End of table of content-->
+
+                                            <!--Create epic details-->
+                                            <div ng-repeat="(product, productData) in data.listProduct"
+                                                 id="EpicDetail.{{product}}" flex>
+                                                <md-card layout-fill layout-padding md-whiteframe="5">
+                                                    <md-card-title>
+                                                        <md-card-title-text>
+                                                            <span class="md-display-1">Product: {{product}}</span> <br/>
+                                                        </md-card-title-text>
+                                                    </md-card-title>
+                                                    <md-card-content>
+                                                        <div layout="column" layout-padding
+                                                             layout-align="space-between stretch">
+                                                            <div ng-repeat="(name, epicList) in productData.data" flex
+                                                                 md-whiteframe="3"><!--Create component container-->
+                                                                <h3 ng-if="name != 'AAAA'" style="text-align: left;">
+                                                                    Component: {{name}}</h3>
+                                                                <h3 ng-if="name == 'AAAA'" style="text-align: left;">
+                                                                    Component:- </h3>
+                                                                <!--Create epic details container-->
+                                                                <md-card
+                                                                        ng-repeat="epic in epicList | orderBy:'key'"
+                                                                        id="{{epic.key}}">
+                                                                    <!--Create toolbar for epic details-->
+                                                                    <md-card-title>
+                                                                        <h2 class="md-title">Epic: <a
+                                                                                href="https://greenhopper.app.alcatel-lucent.com/browse/{{epic.key}}">{{epic.key}}</a>
+                                                                            - {{epic.summary}}</h2>
+                                                                        <div flex=""></div>
+                                                                        <!--md-icon class="material-icons">search</md-icon-->
+                                                                        <!--<form style="margin-left: 16px;" flex="" name="filter.form" class="ng-valid flex ng-valid-parse ng-pristine">-->
+                                                                        <!--<input type="search" ng-model="storytable[$index].search" placeholder="Search..." aria-invalid="false">-->
+                                                                        <!--</form>-->
+                                                                    </md-card-title>
+                                                                    <!--End of create toolbar for epic details-->
+
+                                                                    <!--Create epic details overall table-->
+                                                                    <md-card-content>
+                                                                        <table border="1"
+                                                                               style="width:80%; table-layout:fixed">
+                                                                            <thead>
+                                                                            <tr>
+                                                                                <th style="text-align: center; width:10%;">
+                                                                                    Status
+                                                                                </th>
+                                                                                <th style="text-align: center; width:15%;">
+                                                                                    Feature Owner
+                                                                                </th>
+                                                                                <th style="text-align: center; width:25%;">
+                                                                                    Implementation Authority
+                                                                                </th>
+                                                                                <th style="text-align: center; width:5%;">
+                                                                                    Pri.
+                                                                                </th>
+                                                                                <th style="text-align: center; width:10%;">
+                                                                                    Story Points
+                                                                                </th>
+                                                                                <th style="text-align: center; width:10%;">
+                                                                                    Wiki Estimate
+                                                                                </th>
+                                                                                <th style="text-align: center; width:20%;">
+                                                                                    Target Wiki Reviewed Date
+                                                                                </th>
+                                                                            </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                            <tr>
+                                                                                <td bgcolor="{{getColor(epic.status)}}">
+                                                                                    {{epic.status}}
+                                                                                </td>
+                                                                                <td>{{epic.fo}}</td>
+                                                                                <td>{{epic.ia}}</td>
+                                                                                <td>{{epic.epicPriority}}</td>
+                                                                                <td>{{epic.storyPoints}}</td>
+                                                                                <td><span>{{epic.wikiEstimate}}</span>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <span>{{epic.targetWikiReviewedDate}}</span>
+                                                                                </td>
+                                                                            </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                        <!--End of create epic details overall table-->
+                                                                        <br/>
+                                                                        <!--Create epic details table-->
+                                                                        <table border="1" style="width:100%;">
+                                                                            <thead>
+                                                                            <tr>
+                                                                                <th style="text-align: center; width:8%;">
+                                                                                    Key
+                                                                                </th>
+                                                                                <th style="text-align: center; width:25%;">
+                                                                                    Summary
+                                                                                </th>
+                                                                                <th style="text-align: center; width:7%;">
+                                                                                    Status
+                                                                                </th>
+                                                                                <th style="text-align: center; width:10%;">
+                                                                                    Assignee
+                                                                                </th>
+                                                                                <th style="text-align: center; width:10%;">
+                                                                                    Story Points
+                                                                                </th>
+                                                                                <th style="text-align: center; width:15%;">
+                                                                                    Wiki review date
+                                                                                </th>
+                                                                                <th style="text-align: center; width:10%;">
+                                                                                    Sprint
+                                                                                </th>
+                                                                                <th style="text-align: center; width:15%;">
+                                                                                    Subtasks (op|ip|ir|do)
+                                                                                </th>
+                                                                            </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                            <tr ng-repeat="story in epic.userStoryVOS | orderBy: 'key'">
+                                                                                <td>
+                                                                                    <a href="https://greenhopper.app.alcatel-lucent.com/browse/{{story.key}}">{{story.key}}</a>
+                                                                                </td>
+                                                                                <td>{{story.summary}}</td>
+                                                                                <td bgcolor="{{getColor(story.status)}}">
+                                                                                    {{story.status}}
+                                                                                </td>
+                                                                                <td>{{story.assignee}}</td>
+                                                                                <td>{{story.storyPoints}}</td>
+                                                                                <td>{{story.wikiReviewedDate}}</td>
+                                                                                <td>{{story.sprint}}</td>
+
+                                                                                <td>
+                                                                                    <span ng-if="showPercentageSubTaskColumn(story)">
+                                                                                        {{calculateSubTaskPercentage(story)}}%
+                                                                                        ({{story.subTasksCounter.subTaskCountResults.open}}|{{story.subTasksCounter.subTaskCountResults.inProgress}}|{{story.subTasksCounter.subTaskCountResults.inReview}}|{{story.subTasksCounter.subTaskCountResults.done}})
+                                                                                    </span>
+                                                                                    <span ng-if="!showPercentageSubTaskColumn(story)">
+                                                                                        -
+                                                                                    </span>
+
+                                                                                </td>
+                                                                            </tr>
+                                                                            </tbody>
+                                                                        </table>
+
+                                                                        <div layout="row">
+                                                                            <!--Create progress line-->
+                                                                            <div layout-padding
+                                                                                 layout-align="space-around start" flex>
+                                                                                <div flex="80" layout-padding
+                                                                                     layout="row"
+                                                                                     layout-align="center center"
+                                                                                     style="width:95%;">
+                                                                                    <span class="md-subhead">Progress</span>
+                                                                                    <md-progress-linear
+                                                                                            md-mode="determinate"
+                                                                                            value="{{calculatePercentageEpic(epic)}}"></md-progress-linear>
+                                                                                    <span>{{calculatePercentageEpic(epic)}}%</span>
+                                                                                </div>
+                                                                            </div><!--End of create progress line-->
+                                                                        </div>
+                                                                    </md-card-content>
+                                                                    <!--end of create epic details table-->
+                                                                </md-card><!--End of create epic details container-->
+                                                            </div><!--End of create component container-->
+                                                        </div>
+                                                    </md-card-content>
+                                                </md-card>
+                                            </div>
+                                            <!--End of create epic details-->
+
+                                            <!--Create summary details-->
+                                            <div flex ng-repeat="(product, productData) in data.listProduct"
+                                                 id="SummaryDetail.{{product}}" md-whiteframe="5" layout="column"
+                                                 layout-align="space-around center">
+                                                <md-card layout-fill layout-padding md-whiteframe="5">
+                                                    <md-card-title>
+                                                        <md-card-title-text>
+                                                            <span class="md-display-1">Summary: {{product}}</span>
+                                                            <span class="md-title">Overall Progress</span>
+                                                        </md-card-title-text>
+                                                    </md-card-title>
+                                                    <md-card-content>
+                                                        <div layout="column" layout-padding
+                                                             layout-align="space-between stretch">
+                                                            <div class="overall" layout="column"
+                                                                 layout-align="space-around stretch">
+                                                                <!--Create progress line-->
+                                                                <div layout="column" layout-padding
+                                                                     layout-align="space-around start">
+                                                                    <div flex="60" layout-padding layout="row"
+                                                                         layout-align="center center"
+                                                                         style="width:70%;">
+                                                                        <span class="md-subhead">Progress</span>
+                                                                        <md-progress-linear md-mode="determinate"
+                                                                                            value="{{calculateProgress(productData.overall)}}">
+                                                                        </md-progress-linear>
+                                                                        <span>{{calculateProgress(productData.overall)}}%</span>
+                                                                    </div>
+                                                                </div><!--End of create progress line-->
+                                                                <div layout="column">
+                                                                    <div layout="row">
+                                                                        <!--Create Epic overall progress table-->
+                                                                        <div md-whiteframe="4"
+                                                                             style="width: 400px; margin: 10px;" flex>
+                                                                            <table border="2" style="width:100%;">
+                                                                                <thead>
+                                                                                <tr>
+                                                                                    <th>
+                                                                                        <span>Epics</span>
+                                                                                    </th>
+                                                                                    <th>
+                                                                                        <span>Count</span>
+                                                                                    </th>
+                                                                                    <th>
+                                                                                        <span>Ratio</span>
+                                                                                    </th>
+                                                                                </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                <tr>
+                                                                                    <td>To Do</td>
+                                                                                    <td>
+                                                                                        {{productData.overall.epicCount.todo}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <md-progress-linear
+                                                                                                md-mode="determinate"
+                                                                                                value="{{ (productData.overall.epicCount.todo/productData.overall.epicTotal)*100 }}"></md-progress-linear>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>LA Needed</td>
+                                                                                    <td>
+                                                                                        {{productData.overall.epicCount.laNeeded}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <md-progress-linear
+                                                                                                md-mode="determinate"
+                                                                                                value="{{(productData.overall.epicCount.laNeeded/productData.overall.epicTotal)*100}}"></md-progress-linear>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>Ready for Selection</td>
+                                                                                    <td>
+                                                                                        {{productData.overall.epicCount.readyForSelection}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <md-progress-linear
+                                                                                                md-mode="determinate"
+                                                                                                value="{{ (productData.overall.epicCount.readyForSelection/productData.overall.epicTotal)*100 }}"></md-progress-linear>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>Selected</td>
+                                                                                    <td>
+                                                                                        {{productData.overall.epicCount.selected}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <md-progress-linear
+                                                                                                md-mode="determinate"
+                                                                                                value="{{ (productData.overall.epicCount.selected/productData.overall.epicTotal)*100 }}"></md-progress-linear>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>Defined</td>
+                                                                                    <td>
+                                                                                        {{productData.overall.epicCount.defined}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <md-progress-linear
+                                                                                                md-mode="determinate"
+                                                                                                value="{{ (productData.overall.epicCount.defined/productData.overall.epicTotal)*100 }}"></md-progress-linear>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>Done</td>
+                                                                                    <td>
+                                                                                        {{productData.overall.epicCount.done}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <md-progress-linear
+                                                                                                md-mode="determinate"
+                                                                                                value="{{ (productData.overall.epicCount.done/productData.overall.epicTotal)*100 }}"></md-progress-linear>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>TOTAL</td>
+                                                                                    <td>
+                                                                                        {{productData.overall.epicTotal}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <span></span>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                        <!--End of create Epic overall progress table-->
+
+                                                                        <!--Create user story overall progress table-->
+                                                                        <div md-whiteframe="4"
+                                                                             style="width: 400px; margin: 10px;" flex>
+                                                                            <table border="2" style="width:100%;">
+                                                                                <thead>
+                                                                                <tr>
+                                                                                    <th>
+                                                                                        <span>User Stories</span>
+                                                                                    </th>
+                                                                                    <th>
+                                                                                        <span>Count</span>
+                                                                                    </th>
+                                                                                    <th>
+                                                                                        <span>Ratio</span>
+                                                                                    </th>
+                                                                                </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                <tr>
+                                                                                    <td>Not Created</td>
+                                                                                    <td>{{
+                                                                                        productData.overall.userStoryCount.notCreated}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <md-progress-linear
+                                                                                                md-mode="determinate"
+                                                                                                value="{{ (productData.overall.userStoryCount.notCreated/productData.overall.usTotal)*100 }}"></md-progress-linear>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>To Do</td>
+                                                                                    <td>{{
+                                                                                        productData.overall.userStoryCount.todo}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <md-progress-linear
+                                                                                                md-mode="determinate"
+                                                                                                value="{{ (productData.overall.userStoryCount.todo/productData.overall.usTotal)*100 }}"></md-progress-linear>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>Defined</td>
+                                                                                    <td>{{
+                                                                                        productData.overall.userStoryCount.defined}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <md-progress-linear
+                                                                                                md-mode="determinate"
+                                                                                                value="{{ (productData.overall.userStoryCount.defined/productData.overall.usTotal)*100 }}"></md-progress-linear>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>In Progress</td>
+                                                                                    <td>{{
+                                                                                        productData.overall.userStoryCount.inProgress}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <md-progress-linear
+                                                                                                md-mode="determinate"
+                                                                                                value="{{ (productData.overall.userStoryCount.inProgress/productData.overall.usTotal)*100 }}"></md-progress-linear>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>In Review</td>
+                                                                                    <td>{{
+                                                                                        productData.overall.userStoryCount.inReview}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <md-progress-linear
+                                                                                                md-mode="determinate"
+                                                                                                value="{{ (productData.overall.userStoryCount.inReview/productData.overall.usTotal)*100 }}"></md-progress-linear>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>Done</td>
+                                                                                    <td>{{
+                                                                                        productData.overall.userStoryCount.done}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <md-progress-linear
+                                                                                                md-mode="determinate"
+                                                                                                value="{{ (productData.overall.userStoryCount.done/productData.overall.usTotal)*100 }}"></md-progress-linear>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>TOTAL</td>
+                                                                                    <td>{{productData.overall.usTotal}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <span></span>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                        <!--End of create user story overall progress table-->
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </md-card-content>
+                                                </md-card>
+                                                <!--Create epic table card-->
+                                                <md-card layout-fill layout-padding md-whiteframe="5">
+                                                    <md-card-title aria-hidden="false" layout="row" layout-align="space-between center">
+                                                        <span class="md-title">Epic Details</span>
+                                                        <md-button class="md-icon-button" aria-label="add" ng-click="addNewColumn()">
+                                                            <md-tooltip md-direction="left">
+                                                                Configure column
+                                                            </md-tooltip>
+                                                            <md-icon>settings</md-icon>
+                                                        </md-button>
+
+                                                    </md-card-title>
+                                                    <md-card-content>
+                                                        <table border="1" style="width:100%;">
+                                                            <thead>
+                                                            <th colspan="{{columnSpan()}}" style="text-align: center;width:54%;">
+                                                                Epics
+                                                            </th>
+                                                            <th colspan="8" style="text-align: center;">User Stories
+                                                            </th>
+                                                            </thead>
+                                                            <thead>
+                                                            <tr>
+                                                                <th ng-repeat="column in allEpicDetailsColumns"
+                                                                    ng-show="column.show"
+                                                                    style="text-align: center; ">
+                                                                <span ng-if="column.title != '^'" ng-click="doSorting(column.value)" ng-bind="column.title">
+                                                                </span>
+                                                                </th>
+                                                                <!--<th style="text-align: center; width:6%;">-->
+                                                                <!--<span ng-click="doSorting('key')">-->
+                                                                    <!--Key-->
+                                                                <!--</span></th>-->
+                                                                <!--<th style="width:1%">^</th>-->
+                                                                <!--<th style="text-align: center; width:19%;"><span-->
+                                                                        <!--ng-click="doSorting('summary')">-->
+                                                                    <!--Summary-->
+                                                                <!--</span></th>-->
+                                                                <!--<th style="text-align: center; width:5%;"><span-->
+                                                                        <!--ng-click="doSorting('status')">-->
+                                                                    <!--Status-->
+                                                                <!--</span></th>-->
+                                                                <!--<th style="text-align: center; width:3%;"><span-->
+                                                                        <!--ng-click="doSorting('epicPriority')">-->
+                                                                    <!--Pri.-->
+                                                                <!--</span></th>-->
+                                                                <!--<th style="text-align: center; width:6%;"><span-->
+                                                                        <!--ng-click="doSorting('storyPoints')">-->
+                                                                    <!--Story Points-->
+                                                                <!--</span></th>-->
+                                                                <!--<th style="text-align: center; width:7%;"><span-->
+                                                                        <!--ng-click="doSorting('fo')">-->
+                                                                    <!--FO-->
+                                                                <!--</span></th>-->
+                                                                <!--<th style="text-align: center; width:7%;"><span-->
+                                                                        <!--ng-click="doSorting('ia')">-->
+                                                                    <!--IA-->
+                                                                <!--</span></th>-->
+                                                                <th ng-repeat="column in newColumn"
+                                                                    style="text-align: center; width:{{column.width}};">
+                                                                <span ng-click="doSorting(column.value)" ng-bind="column.title">
+                                                                </span>
+                                                                </th>
+                                                                <th style="text-align: center; width:12%;">Progress</th>
+                                                                <th style="text-align: center; width:3%;"><span
+                                                                        ng-click="doSorting('userStoryVOS.length')">
+                                                                    Total
+                                                                </span></th>
+                                                                <th style="text-align: center; width:6%;"><span
+                                                                        ng-click="doSorting('userStoryCounter.notCreated')">
+                                                                    Not Created
+                                                                </span></th>
+                                                                <th style="text-align: center; width:6%;"><span
+                                                                        ng-click="doSorting('userStoryCounter.notDefined')">
+                                                                    Not Defined
+                                                                </span></th>
+                                                                <th style="text-align: center; width:5%;"><span
+                                                                        ng-click="doSorting('userStoryCounter.defined')">
+                                                                    Defined
+                                                                </span></th>
+                                                                <th style="text-align: center; width:5%;"><span
+                                                                        ng-click="doSorting('userStoryCounter.inProgress')">
+                                                                    In Progress
+                                                                </span></th>
+                                                                <th style="text-align: center; width:5%;"><span
+                                                                        ng-click="doSorting('userStoryCounter.inReview')">
+                                                                    In Review
+                                                                </span></th>
+                                                                <th style="text-align: center; width:4%;"><span
+                                                                        ng-click="doSorting('userStoryCounter.done')">
+                                                                    Done
+                                                                </span></th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <tr ng-repeat="epic in getAllEpicOfProduct(productData.data) | orderBy:orderByField:reverseSort">
+                                                                <!--<td>-->
+                                                                    <!--<a href="https://greenhopper.app.alcatel-lucent.com/browse/{{epic.key}}">{{epic.key}}</a>-->
+                                                                <!--</td>-->
+                                                                <!--<td>{{epic.summary}}</td>-->
+                                                                <!--<td bgcolor="{{getColor(epic.status)}}">-->
+                                                                    <!--{{epic.status}}-->
+                                                                <!--</td>-->
+                                                                <!--<td>{{epic.epicPriority}}</td>-->
+                                                                <!--<td>{{epic.storyPoints}}</td>-->
+                                                                <!--<td>{{epic.fo}}</td>-->
+                                                                <!--<td>{{epic.ia}}</td>-->
+
+                                                                <td ng-repeat="column in allEpicDetailsColumns" ng-show="column.show" ng-style="column.value == 'status' && {'background-color':getColor(epic.status)}">
+                                                                    <a ng-if="column.value == 'key'" href="https://greenhopper.app.alcatel-lucent.com/browse/{{epic.key}}">{{epic.key}}</a>
+                                                                    <a  ng-if="column.title == '^'" href=""
+                                                                       ng-click="gotoAnchor(epic.key,false,false)">^</a>
+                                                                    <span ng-if="column.value != 'key'" ng-bind="epic[column.value]"></span>
+                                                                </td>
+
+                                                                <td>
+                                                                    <md-progress-linear md-mode="determinate"
+                                                                                        value="{{calculatePercentageEpic(epic)}}"></md-progress-linear>
+
+                                                                </td>
+                                                                <td>{{epic.userStoryVOS.length}}
+                                                                </td>
+                                                                <td>{{epic.userStoryCounter.notCreated}}
+                                                                </td>
+                                                                <td>{{epic.userStoryCounter.notDefined}}
+                                                                </td>
+                                                                <td>{{epic.userStoryCounter.defined}}
+                                                                </td>
+                                                                <td>{{epic.userStoryCounter.inProgress}}
+                                                                </td>
+                                                                <td>{{epic.userStoryCounter.inReview}}
+                                                                </td>
+                                                                <td>{{epic.userStoryCounter.done}}
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </md-card-content>
+                                                </md-card><!--Create epic table card-->
+                                            </div><!--End of create summary details-->
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </md-content>
+                        </div>
+                    </md-tab>
+                </md-tabs><!--End of create tab list for each release-->
+            </div>
+
+        </md-content>
+    </div>
+</@layout.myLayout>

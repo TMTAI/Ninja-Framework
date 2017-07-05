@@ -1,0 +1,147 @@
+<#macro myLayout title="Layout example">
+    <!DOCTYPE html>
+    <script type="text/javascript" src="/assets/js/angular.min.js"></script>
+    <script type="text/javascript" src="/assets/js/angular-material.min.js"></script>
+    <script type="text/javascript" src="/assets/js/angular-aria.min.js"></script>
+    <script type="text/javascript" src="/assets/js/angular-animate.min.js"></script>
+    <script type="text/javascript" src="/assets/js/angular-route.min.js"></script>
+    <script type="text/javascript" src="/assets/js/angular-resource.min.js"></script>
+    <script type="text/javascript" src="/assets/js/angular-messages.min.js"></script>
+    <script type="text/javascript" src="/assets/js/angular-cookies.min.js"></script>
+    <script type="text/javascript" src="/assets/jquery/jquery-2.2.4.min.js"></script>
+    <script type="text/javascript" src="/assets/js/md-data-table.min.js"></script>
+    <!-- Datatables -->
+    <script type="text/javascript" src="/assets/datatables/DataTables-1.10.13/js/jquery.dataTables.min.js"></script>
+
+    <!-- Custom script -->
+    <script type="text/javascript" src="/assets/js/constant.js"></script>
+    <script type="text/javascript" src="/assets/js/app.js"></script>
+    <script type="text/javascript" src="/assets/js/product.js"></script>
+    <script type="text/javascript" src="/assets/js/widget-script.js"></script>
+    <script type="text/javascript" src="/assets/js/epic-controller.js"></script>
+    <script type="text/javascript" src="/assets/js/story-controller.js"></script>
+    <script type="text/javascript" src="/assets/js/assignee-controller.js"></script>
+    <script type="text/javascript" src="/assets/js/cycle-controller.js"></script>
+
+    <script type="text/javascript" src="/assets/js/epicSettings.js"></script>
+    <script type="text/javascript" src="/assets/js/assigneeSettings.js"></script>
+    <script type="text/javascript" src="/assets/js/cycleSettings.js"></script>
+    <script type="text/javascript" src="/assets/js/UserStorySettings.js"></script>
+    <!--<script type="text/javascript" src="/assets/js/sorttable.js"></script>-->
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/angular-material.css">
+    <link rel="stylesheet" type="text/css" href="/assets/datatables/DataTables-1.10.13/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="/assets/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/assets/fonts/font-awesome/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/assets/css/bootstrap-theme.min.css"/>
+    <link rel="stylesheet" href="/assets/css/md-data-table.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/assets/css/custom.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/product.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/app.css">
+
+    <html lang="en">
+    <head>
+        <title>${title}</title>
+        <meta charset="UTF-8">
+        <meta name="author" content="">
+        <meta name="viewport" content="width=device-width" id="viewport"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+    </head>
+
+
+    <body ng-app="App" id="body" layout-fill>
+    <div style="background-color: #205081; color: white;position: fixed;width: 100%;height: 40px; z-index: 99" layout="column">
+
+        <div ng-controller="HeaderCtrl" layout="row" layout-align="center center" layout-fill>
+            <div>
+                <h2 style="margin-left: 10px; margin-right: 10px" layout-fill>{{pageName}}</h2>
+            </div>
+
+            <#if (session.username)??>
+                <div flex></div>
+                <md-button style="background-color: inherit;text-decoration: underline;" class="md-primary md-raised" ng-href="/EpgDashboard">EPG Dashboard</md-button>
+                <md-button style="background-color: inherit;text-decoration: underline;" class="md-primary md-raised" ng-href="/">Home</md-button>
+                <div>Hi {{userfullname}}</div>
+
+                <md-button ng-if="!configPage" style="margin-right: 0px;margin-left: 10px"
+                           ng-click="showAddNewDialog($event)"
+                           class="md-icon-button">
+                    <md-icon style="color: white;" class="material-icons">add_circle_outline
+                    </md-icon>
+                    <md-tooltip md-direction="bottom">
+                        Create new dashboard
+                    </md-tooltip>
+
+                </md-button>
+                <md-button href="http://tiger.in.alcatel-lucent.com:8060/user/{{name}}"
+                           class="md-icon-button">
+                    <md-icon style="color: white;" class="material-icons">account_circle</md-icon>
+                </md-button>
+
+                <md-button ng-href="/" ng-if="configPage" class="md-icon-button">
+                    <md-icon style="color: white;" class="material-icons">home</md-icon>
+                    <md-tooltip md-direction="bottom">
+                        Home page
+                    </md-tooltip>
+                </md-button>
+                <!--<md-button ng-if="!configPage" ng-href="/configuration" class="md-icon-button">-->
+                    <!--<md-icon style="color: white;" class="material-icons">settings</md-icon>-->
+                    <!--<md-tooltip md-direction="bottom">-->
+                        <!--Configuration page-->
+                    <!--</md-tooltip>-->
+                <!--</md-button>-->
+                <div ng-show="!configPage">
+
+
+                    <md-menu>
+                        <md-button ng-click="openConfigurationMenu($mdOpenMenu, $event)"
+                                   class="md-icon-button">
+                            <md-icon class="material-icons" style="color: white;">settings
+                            </md-icon>
+                            <md-tooltip md-direction="bottom"> Option
+                            </md-tooltip>
+                        </md-button>
+                        <md-menu-content width="4">
+                            <md-menu-item>
+                                <md-button ng-href="/configuration">
+                                    Release/Greenhooper Configuration
+                                </md-button>
+                            </md-menu-item>
+                            <md-menu-divider></md-menu-divider>
+                            <#if (session.role)??>
+                                <md-menu-item>
+                                    <md-button ng-href="/EpgDashboardConfiguration">
+                                        EPG Dashboard Configuration
+                                    </md-button>
+                                </md-menu-item>
+                             <#else>
+                                 <md-menu-item>
+                                     <md-button ng-click="showAdminFilterDialog()">
+                                         EPG Dashboard Configuration
+                                     </md-button>
+                                 </md-menu-item>
+                            </#if>
+                        </md-menu-content>
+                    </md-menu>
+                </div>
+
+                <md-button ng-href="/logout" class="md-icon-button">
+                    <md-icon style="color: white;" class="material-icons">directions_run</md-icon>
+                    <md-tooltip md-direction="bottom">
+                        Logout
+                    </md-tooltip>
+                </md-button>
+
+            </#if>
+
+        </div>
+
+
+    </div>
+
+    <#nested/>
+    </body>
+    </html>
+</#macro>
