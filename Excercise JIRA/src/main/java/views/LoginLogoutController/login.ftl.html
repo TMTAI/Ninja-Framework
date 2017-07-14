@@ -1,0 +1,56 @@
+<#import "../layout/defaultLayout.ftl.html" as layout>
+    <@layout.myLayout "Login page">
+    <div ng-controller="LoginController">
+        <div layout-fill="" layout-align="center center">
+            <div flex layout="row" layout-align="center center">
+                <div flex="35">
+                    <div class="layout-padding">
+                        <md-card md-whiteframe="10">
+                            <md-card-content layout-align="center center">
+                                <md-card-title layout-align="center">
+                                    <h3>Login</h3>
+                                    <div layout-padding
+                                         layout="column" layout-align="center center">
+
+                                    <span style="color:white;background: red;border-radius: 5px;" ng-if="wronginfo"
+                                          layout-padding>The username or password is incorrect - please try again.</span>
+                                        <span style="color:white;background: red;border-radius: 5px;"
+                                              ng-if="connectionfailed" layout-padding>Unable to connect to authentication server. Please check connection!</span>
+                                        <span style="color:white;background: red;border-radius: 5px;"
+                                              ng-if="cookiesexpired"
+                                              layout-padding>Cookies has expired, please login again!</span>
+                                    </div>
+                                </md-card-title>
+
+                                <form layout="column" action="/login" method="post">
+                                    <md-input-container>
+                                        <label>Username</label>
+                                        <input name="username" ng-model="user.username" required>
+                                    </md-input-container>
+                                    <md-input-container>
+                                        <label>Password</label>
+                                        <input name="password" ng-model="user.password" required>
+                                    </md-input-container>
+                                    <div layout-margin class="md-block" layout="row" layout-align="start center">
+                                        <input style="margin-top:0px" type="checkbox" id="rememberMe" name="rememberMe"
+                                               value="true">
+                                        <p>Remember my login on this computer</p>
+                                    </div>
+                                    <md-card-actions layout-fill layout="column" layout-align="center center">
+                                        <div>
+                                            <md-button class="md-raised md-primary" type="submit">Login</md-button>
+                                            <a accesskey="`" class="aui-button aui-button-link cancel"
+                                               href="#"
+                                               id="login-form-cancel" title="Press Alt+` to cancel">Can't access your
+                                                account?</a>
+                                        </div>
+                                    </md-card-actions>
+                                </form>
+                            </md-card-content>
+                        </md-card>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</@layout.myLayout>
