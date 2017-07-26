@@ -16,19 +16,15 @@
 
 package controllers;
 
+import com.mongodb.client.MongoCollection;
 import ninja.Result;
 import ninja.Results;
 
 import com.google.inject.Singleton;
 import ninja.session.Session;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import service.DatabaseUtility;
-import util.Constant;
 
-import static service.UserService.getJiraProjectofUserfromServer;
-import static service.UserService.getUserInformation;
-import static util.Constant.*;
+import java.util.List;
 
 
 @Singleton
@@ -39,30 +35,5 @@ public class ApplicationController extends DatabaseUtility {
             return Results.redirect("/login");
         }
         return Results.html();
-    }
-
-    public Result getUserInfo(Session session) {
-        try {
-            JSONObject info = getUserInformation(session);
-            JSONObject userInfo = new JSONObject();
-            userInfo.put(DISPLAY_NAME, info.getString(Constant.ALIAS));
-            userInfo.put(Constant.GROUPS, new JSONArray(info.getString(USER_GROUPS)));
-            userInfo.put(ADMIN, info.getBoolean(ADMIN));
-            userInfo.put(Constant.NAME, session.get(USERNAME));
-            userInfo.put(USER_PROJECTS, getJiraProjectofUserfromServer(session));
-            return Results.text().render(userInfo);
-        } catch (Exception e) {
-            return Results.internalServerError();
-        }
-
-    }
-
-    public Result getProjectList(Session session) {
-        try {
-            return Results.text().render(getJiraProjectofUserfromServer(session));
-        } catch (Exception e) {
-            return Results.internalServerError();
-        }
-
     }
 }

@@ -21,12 +21,12 @@ public class UserVO{
     public UserVO() {
     }
 
-    public String getId() {
+    public String get_id() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void set_id(String _id) {
+        this.id = _id;
     }
 
     public String getUsername() {

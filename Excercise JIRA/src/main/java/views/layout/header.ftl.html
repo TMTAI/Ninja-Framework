@@ -1,8 +1,17 @@
 <!-- TOOL BAR -->
 <md-toolbar>
 	<div class="md-toolbar-tools" layout="row" layout-align="start center">
-		<div layout-fill layout="row" layout-align="center center">
-			<h2><span>Login</span></h2>
+		<div layout-fill layout="row" layout-align="start center">
+			<md-button ng-click="showToolbar()" class="md-icon-button">
+				<md-icon aria-label="Menu" class="material-icons">menu</md-icon>
+			</md-button>
+			<h2><span>Welcom</span></h2>
+		</div>
+		<div layout-align="end center" layout="clumn">
+			<md-button class="md-icon-button">
+				<md-tooltip>Login</md-tooltip>
+				<md-icon aria-label="Menu" class="material-icons">person</md-icon>
+			</md-button>
 		</div>
 	</div>
 </md-toolbar>

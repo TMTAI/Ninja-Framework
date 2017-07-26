@@ -1,51 +1,18 @@
 <!-- TOOL BAR -->
 <md-toolbar>
-    <div class="md-toolbar-tools" layout="row" layout-align="start center" style="">
+    <div class="md-toolbar-tools" layout="row" layout-align="start center">
         <div layout-fill layout="row" layout-align="start center">
-            <h2><span>{{pageName}}</span></h2>
+            <md-button ng-click="showToolbar()" class="md-icon-button">
+                <md-icon aria-label="Menu" class="material-icons">menu</md-icon>
+            </md-button>
+            <h2><span>Welcom to MyBlog</span></h2>
         </div>
-        <div layout-align="end center" layout="row" ng-controller="HeaderCtrl" layout-fill>
-            <md-button ng-href="/EpgDashboard" md-no-ink class="md-primary md-raised" style="background-color: inherit">EPG DASHBOARD</md-button>
-
-            <h6>Hi {{userfullname}}</h6>
-
-            <a class="md-button md-icon-button md-ink-ripple" href="/#">
-                <md-tooltip>Home</md-tooltip>
-                <md-icon aria-label="Menu" class="material-icons">home</md-icon>
-            </a>
-            <md-button class="md-icon-button" ng-click="showAddNewDialog($event)">
-                <md-tooltip>Create new dashboard</md-tooltip>
-                <md-icon aria-label="Menu" class="material-icons">add_circle_outline</md-icon>
+        <div layout-align="end center" layout="clumn">
+            <md-button class="md-icon-button">
+                <md-tooltip>Infomation</md-tooltip>
+                <md-icon aria-label="Menu" class="material-icons">person</md-icon>
             </md-button>
-            <md-button class="md-icon-button" href="http://tiger.in.alcatel-lucent.com:8060/user/{{name}}">
-                <md-tooltip>Account</md-tooltip>
-                <md-icon aria-label="Menu" class="material-icons">account_circle</md-icon>
-            </md-button>
-            <div ng-show="!configPage">
-                <md-menu>
-                    <md-button ng-click="openConfigurationMenu($mdOpenMenu, $event)"
-                               class="md-icon-button">
-                        <md-icon class="material-icons" style="color: white;">settings
-                        </md-icon>
-                        <md-tooltip md-direction="bottom"> Option
-                        </md-tooltip>
-                    </md-button>
-                    <md-menu-content width="4">
-                        <md-menu-item>
-                            <md-button ng-href="/configuration">
-                                Release/Greenhooper Configuration
-                            </md-button>
-                        </md-menu-item>
-                        <md-menu-divider></md-menu-divider>
-                        <md-menu-item>
-                            <md-button ng-href="/EpgDashboardConfiguration">
-                                EPG Dashboard Configuration
-                            </md-button>
-                        </md-menu-item>
-                    </md-menu-content>
-                </md-menu>
-            </div>
-            <md-button class="md-icon-button" ng-click="clearCookies()" href="/logout">
+            <md-button class="md-icon-button">
                 <md-tooltip>logout</md-tooltip>
                 <md-icon aria-label="Menu" class="material-icons">input</md-icon>
             </md-button>

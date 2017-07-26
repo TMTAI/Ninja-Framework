@@ -1,15 +1,17 @@
 <#import "../layout/defaultLayout.ftl.html" as layout>
     <@layout.myLayout "Login page">
-    <div ng-controller="HomeController">
+    <div ng-controller="LoginController">
         <div layout-fill="" layout-align="center center">
             <div flex layout="row" layout-align="center center">
-                <div flex="25">
+                <div flex="35">
                     <div class="layout-padding">
-                        <md-card md-whiteframe="5">
+                        <md-card md-whiteframe="10">
                             <md-card-content layout-align="center center">
                                 <md-card-title layout-align="center">
-                                    <h4>Dashboad Management</h4>
-                                    <div layout="column" layout-align="center center">
+                                    <h3>Login</h3>
+                                    <div layout-padding
+                                         layout="column" layout-align="center center">
+
                                     <span style="color:white;background: red;border-radius: 5px;" ng-if="wronginfo"
                                           layout-padding>The username or password is incorrect - please try again.</span>
                                         <span style="color:white;background: red;border-radius: 5px;"
@@ -20,38 +22,28 @@
                                     </div>
                                 </md-card-title>
 
-                                <form layout="column" action="/login" method="post" name="loginForm">
+                                <form layout="column" action="/login" method="post">
                                     <md-input-container>
                                         <label>Username</label>
-                                        <input name="username" type="text" ng-model="user.username" required minlength="3" maxlength="32">
-                                        <div ng-messages="loginForm.username.$error">
-                                            <div ng-message="required">This is required.</div>
-                                            <div ng-message="minlength">Min length is 3</div>
-                                            <div ng-message="maxlength">Max length is 32</div>
-                                        </div>
+                                        <input name="username" ng-model="user.username" required>
                                     </md-input-container>
                                     <md-input-container>
                                         <label>Password</label>
-                                        <input name="password" type="password" ng-model="user.password" required>
-                                        <div ng-messages="loginForm.password.$error">
-                                            <div ng-message="required">This is required.</div>
-                                            <div ng-message="minlength">Min length is 3</div>
-                                            <div ng-message="maxlength">Max length is 32</div>
-                                        </div>
+                                        <input name="password" ng-model="user.password" required>
                                     </md-input-container>
                                     <div layout-margin class="md-block" layout="row" layout-align="start center">
                                         <input style="margin-top:0px" type="checkbox" id="rememberMe" name="rememberMe"
                                                value="true">
                                         <p>Remember my login on this computer</p>
                                     </div>
-                                    <md-card-actions layout-fill layout="row" layout-align="center center">
-                                        <div style="padding-right: 20px">
+                                    <md-card-actions layout-fill layout="column" layout-align="center center">
+                                        <div>
                                             <md-button class="md-raised md-primary" type="submit">Login</md-button>
+                                            <a accesskey="`" class="aui-button aui-button-link cancel"
+                                               href="#"
+                                               id="login-form-cancel" title="Press Alt+` to cancel">Can't access your
+                                                account?</a>
                                         </div>
-                                        <a accesskey="`" class="aui-button aui-button-link cancel"
-                                           href="#"
-                                           id="login-form-cancel" title="Press Alt+` to cancel">Can't access your
-                                            account?</a>
                                     </md-card-actions>
                                 </form>
                             </md-card-content>
